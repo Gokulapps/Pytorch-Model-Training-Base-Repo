@@ -145,30 +145,3 @@ def scores():
   return model, train_loss, train_acc, test_loss, test_acc
 
 fit_model(model, device, 10, train_loader, test_loader, False, True)
-
-classes=train_dataset.classes
-plot_misclassified_images(incorrect_pred, classes, fig_size=(10, 10))
-
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model = ResNet18().to(device)
-test_loss, test_acc, incorrect_pred = fit_model(model, device, 10, train_loader, test_loader, False, True)
-misclassified_images = [incorrect_pred[i][0] for index in range(len(incorrect_pred))]
-misclassified_image_batch = np.stack(misclassified_images, axis=0)
-
-misclassified_images = [incorrect_pred[i][0] for index in range(len(incorrect_pred))]
-misclassified_image_batch = np.stack(misclassified_images, axis=0)
-
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model = ResNet18().to(device)
-test_loss, test_acc, incorrect_pred = fit_model(model, 10, train_loader, test_loader, False, True)
-misclassified_image = incorrect_pred[0][0]
-
-misclassified_images = [torch.cat(incorrect_pred[index][0], dim=0) for index in range(len(incorrect_pred))][0]
-target_layers = [model.layer4[-1]]
-cam = GradCAM(model=model, target_layers=target_layers, use_cuda=True)
-targets = [ClassifierOutputTarget(281)]
-grayscale_cam = cam(input_tensor=misclassified_image.unsqueeze(0))
-grayscale_cam = grayscale_cam[0, :]
-visualization = show_cam_on_image(misclassified_image, grayscale_cam, use_rgb=True, colormap = 1, image_weight=0.5)     
-# visualization = show_cam_on_image()
-
