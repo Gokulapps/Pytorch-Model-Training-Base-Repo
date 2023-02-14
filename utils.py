@@ -94,7 +94,7 @@ def misclassified_images(model, testloader, limit=10):
       data, target = data.to(device), target.to(device)
       output = model(data)
       predictions = output.argmax(dim=1, keepdim=True)
-      incorrect_indices = predictions.ne(target.view_as(predictions)).nonzero(as_tuple=True)[0]_
+      incorrect_indices = predictions.ne(target.view_as(predictions)).nonzero(as_tuple=True)[0]
       for index in incorrect_indices[:limit-count]:
         incorrect_index = index.item()
         incorrect_predictions.append([data[incorrect_index], predictions[incorrect_index], target[incorrect_index]])
