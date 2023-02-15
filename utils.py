@@ -16,6 +16,7 @@ import torch.autograd as grad
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import albumentations as A
 import warnings
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
@@ -26,19 +27,6 @@ from torchvision import datasets, transforms
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 warnings.filterwarnings("ignore")
-
-class torchvisionDataset(dataset_class):
-  def __init__(self, root='./data', train=True, download=True, transform=None):
-    super().__init__(root=root, train=train, download=download, transform=transform)
-
-  def __len__(self):
-    return len(self.data)
-
-  def __getitem__(self, index):
-    image, label = self.data[index], self.targets[index]
-    if self.transform:
-      image = self.transform(image=image)['image'] 
-    return image, label
 
 class AlbumentationDataset(Dataset):
   def __init__(self, data, dataset_mean, dataset_std, image_size, train=True):
@@ -58,9 +46,9 @@ class AlbumentationDataset(Dataset):
   def __getitem__(self, index):
     image, label = self.data[index]
     if self.train:
-      self.train_aug(image=np.array(image))['image']
+      image = self.train_aug(image=np.array(image))['image']
     else:
-      self.norm_aug(image=np.array(image))['image']
+      image = self.norm_aug(image=np.array(image))['image']
     image = np.transpose(image, (2, 0, 1)).astype(np.float32)
     return torch.tensor(image, dtype=torch.float), label
 
@@ -82,15 +70,17 @@ def visualize_images(images, target, classes=None, fig_size=(6.4, 4.8)):
     if classes:
       collection = [classes[target[i].item()] for i in range(target.shape[0])]
       plt.title('     '.join(collection))
+    else:
+      plt.title('Sample Images from Dataset', fontsize=30)
     plt.imshow(np.transpose(grid, (1, 2, 0)))
   except Exception as e:
     print(e)
 
-def misclassified_images(model, testloader, limit=10):
+def misclassified_images(model, device, testloader, limit=10):
   incorrect_predictions = []
   count = 0
   with torch.no_grad():
-    for data, target in test_loader:
+    for data, target in testloader:
       data, target = data.to(device), target.to(device)
       output = model(data)
       predictions = output.argmax(dim=1, keepdim=True)
@@ -105,10 +95,10 @@ def misclassified_images(model, testloader, limit=10):
   return incorrect_predictions
 
 
-def plot_graph(test_losses, test_acc, fig_size=(15,10)):
+def plot_graph(test_loss, test_acc, fig_size=(15,10)):
   try:
     fig, axs = plt.subplots(2, 1, figsize=fig_size)
-    axs[0].plot(test_losses, color='green')
+    axs[0].plot(test_loss, color='green')
     axs[0].set_title("Validation Loss")
     axs[0].set_xlabel('Number of Epoch')
     axs[0].set_ylabel('Loss')
@@ -127,7 +117,7 @@ def plot_misclassified_images(incorrect_predictions, classes, row, col, limit, f
     for index in range(1, limit+1):
       plt.subplot(row, col, index)
       plt.axis('off')
-      image = (incorrect_predictions[index - 1][0].to('cpu').numpy() / 2) + 0.5
+      image = (incorrect_predictions[index - 1][0].to('cpu').numpy() / 255.)
       npimage = np.transpose(image, (1, 2, 0))
       plt.title(f'Model Prediction : {classes[incorrect_predictions[index-1][1]]}, Actual Label : {classes[incorrect_predictions[index-1][2]]}')
       plt.imshow(npimage, cmap='gray_r')
