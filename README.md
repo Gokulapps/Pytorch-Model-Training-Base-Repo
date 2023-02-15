@@ -9,10 +9,11 @@ This Repo Containes Python Code for Training Model on any Torchvision Dataset pr
 
 # Contents of the Repo 
 
-Files/Folders  |    Description
-models         | This Directory is going to be used for storing Custom as well as Pretrained Models which can be used in the main script for training it on any Torchvision dataset
-main.py        | Python File where the code for Training the Model on any Torchvision Dataset resides
-utils.py       | Additional Python File which has some useful functionalities like Plotting Validation Accuracy, Validation Loss, Displaying Misclassified Images alog with few others 
+Files/Folders  |                                                                 Description                                                                            |
+---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+models         | This Directory is going to be used for storing Custom as well as Pretrained Models which can be used in the main script for training it on any           Torchvision dataset                                                                                                                                                     |
+main.py        | Python File where the code for Training the Model on any Torchvision Dataset resides                                                                   |
+utils.py       | Additional Python File which has some useful functionalities like Plotting Validation Accuracy, Validation Loss, Displaying Misclassified Images along  with few others                                                                                                                                                         |
 
 * Sample Validation Accuracy and Loss Curve used in this Repo
   <p align="left">
