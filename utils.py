@@ -33,13 +33,11 @@ class AlbumentationDataset(Dataset):
     self.data = data
     self.train= train 
     self.image_size = image_size
-    self.avg = sum(dataset_mean)/len(dataset_mean)
     self.train_aug = A.Compose([
                           A.Normalize(dataset_mean, dataset_std),
-                          A.HorizontalFlip(), 
-                          A.ShiftScaleRotate(), 
-                          A.CoarseDropout(max_holes=1, max_height=self.image_size//2, max_width=self.image_size//2, fill_value=self.avg),
-                          A.ToGray()])
+                          A.CoarseDropout(max_holes=1, max_height=self.image_size//2, max_width=self.image_size//2, fill_value=dataset_mean), 
+                          A.HorizontalFlip()
+                          ])
     self.norm_aug = A.Compose([A.Normalize(dataset_mean, dataset_std)])
   def __len__(self):
     return len(self.data)
@@ -51,7 +49,6 @@ class AlbumentationDataset(Dataset):
       image = self.norm_aug(image=np.array(image))['image']
     image = np.transpose(image, (2, 0, 1)).astype(np.float32)
     return torch.tensor(image, dtype=torch.float), label
-
 
 def get_mean_and_std(dataset, no_channels):
   try:
@@ -94,7 +91,6 @@ def misclassified_images(model, device, testloader, limit=10):
         return incorrect_predictions
   return incorrect_predictions
 
-
 def plot_graph(test_loss, test_acc, fig_size=(15,10)):
   try:
     fig, axs = plt.subplots(2, 1, figsize=fig_size)
@@ -110,14 +106,13 @@ def plot_graph(test_loss, test_acc, fig_size=(15,10)):
   except Exception as e:
     print(e)
 
-
 def plot_misclassified_images(incorrect_predictions, classes, row, col, limit, fig_size=(10, 10)):
   try:
     fig = plt.figure(figsize=fig_size)
     for index in range(1, limit+1):
       plt.subplot(row, col, index)
       plt.axis('off')
-      image = (incorrect_predictions[index - 1][0].to('cpu').numpy() / 255.)
+      image = (incorrect_predictions[index - 1][0].to('cpu').numpy() / 2) + 0.5
       npimage = np.transpose(image, (1, 2, 0))
       plt.title(f'Model Prediction : {classes[incorrect_predictions[index-1][1]]}, Actual Label : {classes[incorrect_predictions[index-1][2]]}')
       plt.imshow(npimage, cmap='gray_r')
