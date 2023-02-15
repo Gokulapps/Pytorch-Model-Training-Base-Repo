@@ -4,6 +4,9 @@ This Repo Containes Python Code for Training Model on any Torchvision Dataset pr
 <p align="center">
 <img width="500" height="300" src="https://user-images.githubusercontent.com/61132761/219113151-b0cb785c-a1eb-4de4-97f0-ec7e5ed1870d.png">    
 </p>
+<p align = "center">
+Sample CIFAR10 Dataset
+</p>
 
 # Contents of the Repo 
 
