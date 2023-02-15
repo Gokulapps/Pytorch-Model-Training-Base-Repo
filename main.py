@@ -45,15 +45,27 @@ model = ResNet18().to(device)
 if device == 'cuda':
   print("=> Parallelizing Training across Multiple GPU's")
   model = torch.nn.DataParallel(model)
-  cudnn.benchmark = True
+
+class torchvisionDataset(dataset_class):
+  def __init__(self, root='./data', train=True, download=True, transform=None):
+    super().__init__(root=root, train=train, download=download, transform=transform)
+
+  def __len__(self):
+    return len(self.data)
+
+  def __getitem__(self, index):
+    image, label = self.data[index], self.targets[index]
+    return image, label
+
 
 transform = transforms.Compose([transforms.ToTensor()])
 train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=transform)
 test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=transform)
 train_dataset_mean, train_dataset_std = get_mean_and_std(train_dataset, 3)
 test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
-train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=4, shuffle=True, num_workers=2, pin_memory = True)
-test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=4, shuffle=True, num_workers=2, pin_memory = True)
+train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
+test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
+
 
 def train(model, device, train_loader, optimizer, l1_reg):
   global train_acc, train_loss
@@ -97,28 +109,27 @@ def test(model, device, test_loader, epoch):
       correct += pred.eq(target.view_as(pred)).sum().item()
 
   loss /= len(test_loader.dataset)
-  test_loss.append(test_loss)
+  test_loss.append(loss)
   accuracy = 100. * correct / len(test_loader.dataset)
   print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-      test_loss, correct, len(test_loader.dataset),
-      accuracy))
+      loss, correct, len(test_loader.dataset), accuracy))
   
   test_acc.append(accuracy)
   if accuracy > best_acc:
-      print('Saving..')
       state = {
           'model': model.state_dict(),
           'accuracy': accuracy,
           'epoch': epoch,
-          'optimizer': optimizer.state_dict()
+          #'optimizer': optimizer.state_dict()
       }
       if not os.path.isdir('checkpoint'):
           os.mkdir('checkpoint')
-      torch.save(state, './checkpoint/model_progress.pth')
+      torch.save(state, './checkpoint/model_state.pth')
+      torch.save(model, './checkpoint/model.pth')
       best_acc = accuracy
 
 def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
-  global best_acc, Epochs
+  global best_acc, Epochs, test_loss, test_acc
   if l2:
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4)
   else:
@@ -130,18 +141,22 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
     assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
     checkpoint = torch.load('./checkpoint/model.pth')
     model.load_state_dict(checkpoint['model'])
-    optimizer.load_state_dict(checkpoint['optimizer'])
+    #optimizer.load_state_dict(checkpoint['optimizer'])
     best_acc = checkpoint['accuracy']
     start_epoch = checkpoint['epoch']
   else:
     start_epoch = 1
+  print('Model Training...')
   for epoch in range(start_epoch, Epochs+1):
     print("EPOCH:", epoch)
     train(model, device, trainloader, optimizer, l1)
     scheduler.step()
     test(model, device, testloader, epoch)
 
-def scores():
-  return model, train_loss, train_acc, test_loss, test_acc
-
-fit_model(model, device, 10, train_loader, test_loader, False, True)
+fit_model(model, device, train_loader, test_loader, False, True)
+print('Model Saved')
+print('Plotting Graphs')
+plot_graph(test_loss, test_acc, fig_size=(15,10))
+print('Displaying Sample Images from Dataset)
+images, target = next(iter(train_loader))
+visualize_images(images, target, classes=None, fig_size=(20, 10))
