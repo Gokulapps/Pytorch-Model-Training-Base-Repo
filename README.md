@@ -1,11 +1,10 @@
 # Model Training Using Pytorch 
 
 This Repo Containes Python Code for Training Model on any Torchvision Dataset provided as Argument to the Code
+![Sample CIFAR10 Dataset]([https://github.com/username/repository/image.png](https://user-images.githubusercontent.com/61132761/219100619-816945e3-a504-4f03-a68e-73bd32ea27b6.png))
 <p align="center">
-  <img src="![image](https://user-images.githubusercontent.com/61132761/219100619-816945e3-a504-4f03-a68e-73bd32ea27b6.png)" alt="Cifare10 Dataset" width="400" height="300" />
+  <img src="![image](https://user-images.githubusercontent.com/61132761/219100619-816945e3-a504-4f03-a68e-73bd32ea27b6.png)" width="400" height="300" />
 </p>
-
-<p align="center">Cifar10 Dataset Sample</p>
 
 # Contents of the Repo 
 
@@ -16,8 +15,9 @@ main.py        | Python File where the code for Training the Model on any Torchv
 utils.py       | Additional Python File which has some useful functionalities like Plotting Validation Accuracy, Validation Loss, Displaying Misclassified Images along  with few others                                                                                                                                                         |
 
 * Sample Validation Accuracy and Loss Curve used in this Repo
+  ![Model Performance](https://user-images.githubusercontent.com/61132761/219105985-1e04e9d0-28ab-4e33-942b-1aa345723c4b.png)
   <p align="left">
-  <img src="![image](https://user-images.githubusercontent.com/61132761/219105985-1e04e9d0-28ab-4e33-942b-1aa345723c4b.png)" alt="Model Performance" width="200" height="200" />
+  <img src="![image](https://user-images.githubusercontent.com/61132761/219105985-1e04e9d0-28ab-4e33-942b-1aa345723c4b.png)" width="200" height="200" />
   </p>
 
 # Command Line Interface used in the Main Script
