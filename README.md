@@ -1,7 +1,7 @@
 # Model Training Using Pytorch 
 
 This Repo Containes Python Code for Training Model on any Torchvision Dataset provided as Argument to the Code
-                     ![Sample CIFAR10 Dataset](https://user-images.githubusercontent.com/61132761/219100619-816945e3-a504-4f03-a68e-73bd32ea27b6.png)
+<img align="left" width="100" height="100" src="https://user-images.githubusercontent.com/61132761/219113151-b0cb785c-a1eb-4de4-97f0-ec7e5ed1870d.png">                  
 
 # Contents of the Repo 
 
