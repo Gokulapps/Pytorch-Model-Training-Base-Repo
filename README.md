@@ -21,8 +21,8 @@ utils.py       | Additional Python File which has some useful functionalities li
 
 # Command Line Interface used in the Main Script
 
-* Training can be Initiated by Providing Dataset Name and Number of Epochs as Arguments to the Main File
+* Training can be Initiated by Providing Dataset Name and Number of Epochs as Arguments to the Main File<br>
      main.py CIFAR10 20
 
-* Resume Training from the checkpoint
+* Resume Training from the checkpoint<br>
      main.py --resume
