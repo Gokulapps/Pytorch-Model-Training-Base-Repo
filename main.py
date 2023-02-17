@@ -21,6 +21,7 @@ from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from models.resnet import ResNet18 
+from models.custom_resnet import CustomResnet
 from utils import *
 from torch.optim.lr_scheduler import StepLR
 from torchvision import datasets, transforms
@@ -41,7 +42,8 @@ train_acc = []
 test_loss = []
 test_acc = []
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model = ResNet18().to(device)
+# model = ResNet18().to(device)
+model = CustomResnet().to(device)
 if device == 'cuda':
   print("=> Parallelizing Training across Multiple GPU's")
   model = torch.nn.DataParallel(model)
