@@ -23,7 +23,7 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 from models.resnet import ResNet18 
 from models.custom_resnet import CustomResnet
 from utils import *
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import OneCycleLR
 from torchvision import datasets, transforms
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
@@ -32,6 +32,7 @@ warnings.filterwarnings("ignore")
 parser = argparse.ArgumentParser(description='Model Training on Selected PyTorch Dataset')
 parser.add_argument('dataset', default='CIFAR10', type=str, help='Pytorch Datasets like CIFAR10, MNIST, FashionMNIST')
 parser.add_argument('epochs', default=20, type=int, help='Number of Epochs')
+parser.add_argument('max_lr', default=0.017, type=float, help='Maximum Learning Rate')
 parser.add_argument('--resume', '-r', action='store_true',help='Resume from checkpoint')
 args = parser.parse_args()
 Epochs = args.epochs
@@ -136,7 +137,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4)
   else:
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-  scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
+  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, steps_per_epoch=len(train_loader))
   if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
