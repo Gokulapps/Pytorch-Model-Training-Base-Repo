@@ -15,7 +15,7 @@ class CustomResnet(nn.Module):
         self.block2 = self.ResBlock(128, 128, 3, 1, 1)
         # Addition Step Implemented in Forward Method
         # Layer 2 Conv 3x3 [256k] -> MaxPooling2D -> BN -> ReLU
-        self.layer2 = self.xblock(128, 256, 3, 1, 0)
+        self.layer2 = self.xblock(128, 256, 3, 1, 1)
         # Layer 3
         # X = Conv 3x3 (s1, p1) >> MaxPool2D >> BN >> RELU [512k]
         self.block3 = self.xblock(256, 512, 3, 1, 1)
