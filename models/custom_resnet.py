@@ -20,7 +20,7 @@ class CustomResnet(nn.Module):
         # X = Conv 3x3 (s1, p1) >> MaxPool2D >> BN >> RELU [512k]
         self.block3 = self.xblock(256, 512, 3, 1, 1)
         # R2 = ResBlock( (Conv-BN-ReLU-Conv-BN-ReLU))(X) [512k]
-        self.block4 = self.xblock(512, 512, 3, 1, 1)
+        self.block4 = self.ResBlock(512, 512, 3, 1, 1)
         # Addition Step Implemented in Forward Method
         # MaxPooling with Kernel Size 4
         self.MaxPool = nn.MaxPool2d(4, 4)
