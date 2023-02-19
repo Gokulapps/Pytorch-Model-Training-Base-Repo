@@ -84,7 +84,7 @@ def classwise_accuracy(model, train_loader, classes, device):
                 output = model(images)
                 predictions = output.argmax(dim=1, keepdim=True)
                 for index, pred in enumerate(predictions):
-                    if pred == target[index]:
+                    if pred == labels[index]:
                         class_acc[classes[pred]][0] += 1
                         class_acc[classes[pred]][1] += 1
                     else:
@@ -100,7 +100,7 @@ def model_summary(model, input_size):
     except Exception as e:
         print(e)
 
-def find_lr(model, device, train_loader):
+def max_lr_finder(model, device, train_loader):
     try:
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr=0.01,
