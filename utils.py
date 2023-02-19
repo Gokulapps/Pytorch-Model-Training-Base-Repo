@@ -21,6 +21,8 @@ import warnings
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
+from torch_lr_finder import LRFinder
+from torchsummary import summary
 from tqdm import tqdm
 from torch.optim.lr_scheduler import StepLR
 from torchvision import datasets, transforms
@@ -73,6 +75,44 @@ def visualize_images(images, target, classes=None, fig_size=(6.4, 4.8)):
   except Exception as e:
     print(e)
 
+def classwise_accuracy(model, train_loader, classes, device):
+    try:
+        class_acc = {key:[0, 0] for key in classes}
+        with torch.no_grad():
+            for images, labels in train_loader:
+                images, labels = images.to(device), labels.to(device)
+                output = model(images)
+                predictions = output.argmax(dim=1, keepdim=True)
+                for index, pred in enumerate(predictions):
+                    if pred == target[index]:
+                        class_acc[classes[pred]][0] += 1
+                        class_acc[classes[pred]][1] += 1
+                    else:
+                        class_acc[classes[pred]][1] += 1
+            for key, value in class_acc.items():
+                print(f'Accuracy for {key} is {((value[0]/value[1]) * 100):.2f}')
+    except Exception as e:
+        print(e)
+        
+def model_summary(model, input_size):
+    try:
+        return summary(model, input_size = input_size)
+    except Exception as e:
+        print(e)
+
+def find_lr(model, device, train_loader):
+    try:
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(model.parameters(), lr=0.01,
+                              momentum=0.9)
+        lr_finder = LRFinder(model, optimizer, criterion, device=device)
+        lr_finder.range_test(train_loader, end_lr=0.02,num_iter=200)
+        lr_finder.plot()
+        lr_finder.reset()
+        return lr_finder.history['lr'][np.argmin(lr_finder.history['loss'], axis=0)]
+    except Exception as e:
+        print(e)
+
 def misclassified_images(model, device, testloader, limit=10):
   incorrect_predictions = []
   count = 0
@@ -119,8 +159,8 @@ def plot_misclassified_images(incorrect_predictions, classes, row, col, limit, f
   except Exception as e:
     print(e)
 
-def Gradcam(model, input_tensor, device, target):
-    target_layers = [model.layer4[-1]]
+def Gradcam(model, input_tensor, target_layer_name, device, target):
+    target_layers = getattr(model, target_layer_name)[-1]
     cam = GradCAM(model=model, target_layers=target_layers, use_cuda=device)
     targets = [ClassifierOutputTarget(target)]
     grayscale_cam = cam(input_tensor=input_tensor, targets=targets, aug_smooth=True, eigen_smooth=True)
