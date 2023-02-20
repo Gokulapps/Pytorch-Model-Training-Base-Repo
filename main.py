@@ -30,9 +30,10 @@ from torch.utils.data import DataLoader
 warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser(description='Model Training on Selected PyTorch Dataset')
-parser.add_argument('dataset', default='CIFAR10', type=str, help='Pytorch Datasets like CIFAR10, MNIST, FashionMNIST')
+parser.add_argument('dataset', default='CIFAR10', type=str, help='Provide Pytorch Datasets like CIFAR10, MNIST, FashionMNIST')
 parser.add_argument('epochs', default=20, type=int, help='Number of Epochs')
-parser.add_argument('max_lr', default=0.017, type=float, help='Maximum Learning Rate')
+parser.add_argument('lr', default=0.001, type=float, help='Learning Rate)
+parser.add_argument('max_lr', default=0.017, type=float, help='Maximum Learning Rate for OneCyclePolicy')
 parser.add_argument('--augmentation', action='store_true', help='whether to Perform Augmentation or not')
 parser.add_argument('--resume', '-r', action='store_true', help='Resume from checkpoint')
 args = parser.parse_args()
@@ -69,10 +70,9 @@ train_dataset_mean, train_dataset_std = get_mean_and_std(train_dataset, 3)
 test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
 if args.augmentation:
     train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
-    test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=64, shuffle=False, num_workers=2, pin_memory = True)
 else:
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False, num_workers=2, pin_memory = True)
+    train_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
+test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=64, shuffle=False, num_workers=2, pin_memory = True)
 
 
 def train(model, device, train_loader, optimizer, l1_reg):
@@ -139,9 +139,9 @@ def test(model, device, test_loader, epoch):
 def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
   global best_acc, Epochs, test_loss, test_acc
   if l2:
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
   else:
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
   scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, steps_per_epoch=len(train_loader), div_factor=10, pct_start=5/24)
   if args.resume:
     # Load checkpoint.
