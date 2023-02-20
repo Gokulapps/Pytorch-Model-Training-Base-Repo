@@ -89,6 +89,7 @@ def train(model, device, train_loader, optimizer, l1_reg):
     loss = criterion(y_pred, target) 
     if l1_reg:
       l1 = 0
+      lambda_y = 0.00025
       for param in model.parameters():
         l1 += param.abs().sum()
       loss += lambda_y * l1
