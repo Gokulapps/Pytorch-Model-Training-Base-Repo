@@ -161,7 +161,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
     scheduler.step()
     test(model, device, testloader, epoch)
 
-fit_model(model, device, train_loader, test_loader, False, True)
+fit_model(model, device, train_loader, test_loader, True, False)
 print('Model Saved')
 print('Plotting Graphs')
 plot_graph(test_loss, test_acc, fig_size=(15,10))
