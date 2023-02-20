@@ -84,11 +84,12 @@ def classwise_accuracy(model, train_loader, classes, device):
                 output = model(images)
                 predictions = output.argmax(dim=1, keepdim=True)
                 for index, pred in enumerate(predictions):
-                    if pred == labels[index]:
-                        class_acc[classes[pred]][0] += 1
-                        class_acc[classes[pred]][1] += 1
+                    target = labels[index]
+                    if pred == target:
+                        class_acc[classes[target]][0] += 1
+                        class_acc[classes[target]][1] += 1
                     else:
-                        class_acc[classes[pred]][1] += 1
+                        class_acc[classes[target]][1] += 1
             for key, value in class_acc.items():
                 print(f'Accuracy for {key} is {((value[0]/value[1]) * 100):.2f}')
     except Exception as e:
