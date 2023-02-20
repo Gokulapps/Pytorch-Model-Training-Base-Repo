@@ -159,8 +159,8 @@ def plot_misclassified_images(incorrect_predictions, classes, row, col, limit, f
   except Exception as e:
     print(e)
 
-def Gradcam(model, input_tensor, target_layer_name, device, target):
-    target_layers = getattr(model, target_layer_name)[-1]
+def Gradcam(model, input_tensor, target_layer, part, device, target):
+    target_layers = getattr(model, target_layer)[part]
     cam = GradCAM(model=model, target_layers=target_layers, use_cuda=device)
     targets = [ClassifierOutputTarget(target)]
     grayscale_cam = cam(input_tensor=input_tensor, targets=targets, aug_smooth=True, eigen_smooth=True)
