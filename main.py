@@ -71,7 +71,7 @@ test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
 if args.augmentation:
     train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
 else:
-    train_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
+    train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=False), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
 test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=64, shuffle=False, num_workers=2, pin_memory = True)
 
 
