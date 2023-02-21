@@ -97,13 +97,13 @@ def train(model, device, train_loader, optimizer, l1_reg, scheduler):
     train_loss.append(loss)
     loss.backward()
     optimizer.step()  
+    scheduler.step()
     pred = y_pred.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
     correct += pred.eq(target.view_as(pred)).sum().item()
     processed += len(images)
     accuracy = 100*correct/processed
     pbar.set_description(desc= f'Loss={loss.item()} Batch_id={batch_idx} Accuracy={accuracy:0.2f}')
     train_acc.append(accuracy)
-    scheduler.step()
 
 def test(model, device, test_loader, epoch):
   global best_acc, test_loss, test_acc
@@ -145,10 +145,11 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
   else:
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
-  total_steps = len(train_loader)*Epochs
-  step_size_up = len(train_loader) * int(round(Epochs * 0.20833333333))
+  steps_per_epoch = len(train_loader) 
+  total_steps = steps_per_epoch * Epochs
+  step_size_up = steps_per_epoch * 5
   step_size_down = total_steps - step_size_up
-  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=len(train_loader), pct_start=step_size_up/total_steps, anneal_strategy = 'cos')
+  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=steps_per_epoch, pct_start=step_size_up/total_steps)
   if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
@@ -166,7 +167,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
     train(model, device, trainloader, optimizer, l1, scheduler)
     test(model, device, testloader, epoch)
 
-fit_model(model, device, train_loader, test_loader, False, True)
+fit_model(model, device, train_loader, test_loader, False, False)
 print('Model Saved')
 print('Plotting Graphs')
 plot_graph(test_loss, test_acc, fig_size=(15,10))
