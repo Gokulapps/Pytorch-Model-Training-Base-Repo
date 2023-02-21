@@ -103,16 +103,15 @@ def model_summary(model, input_size):
     except Exception as e:
         print(e)
 
-def max_lr_finder(model, device, train_loader):
+def find_optimal_lr(model, device, train_loader, optimizer, criterion, end_lr=0.0001, num_iter=200, step_mode='exp', diverge_th=5):
     try:
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr=1,
-                              momentum=0.9)
         lr_finder = LRFinder(model, optimizer, criterion, device=device)
-        lr_finder.range_test(train_loader, end_lr=0.0001,num_iter=200)
+        lr_finder.range_test(train_loader, end_lr=end_lr, num_iter=num_iter, step_mode=step_mode, diverge_th=diverge_th)
         lr_finder.plot()
         lr_finder.reset()
-        return lr_finder.history['lr'][np.argmin(lr_finder.history['loss'], axis=0)]
+        optimal_lr = lr_finder.history['lr'][np.argmin(lr_finder.history['loss'], axis=0)]
+        max_lr = optimal_lr * 10  # Set maximum learning rate as 10x optimal learning rate
+        return optimal_lr, max_lr
     except Exception as e:
         print(e)
 
