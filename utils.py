@@ -106,10 +106,10 @@ def model_summary(model, input_size):
 def max_lr_finder(model, device, train_loader):
     try:
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr=0.01,
+        optimizer = optim.SGD(model.parameters(), lr=1,
                               momentum=0.9)
         lr_finder = LRFinder(model, optimizer, criterion, device=device)
-        lr_finder.range_test(train_loader, end_lr=0.02,num_iter=200)
+        lr_finder.range_test(train_loader, end_lr=0.0001,num_iter=200)
         lr_finder.plot()
         lr_finder.reset()
         return lr_finder.history['lr'][np.argmin(lr_finder.history['loss'], axis=0)]
