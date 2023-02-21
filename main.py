@@ -147,7 +147,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
   total_steps = len(train_loader)*Epochs
   step_size_up = len(train_loader) * int(round(Epochs * 0.20833333333))
   step_size_down = total_steps - step_size_up
-  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=len(train_loader), pct_start=step_size_up, anneal_strategy = 'linear')
+  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=len(train_loader), pct_start=step_size_up/total_steps, anneal_strategy = 'linear')
   if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
