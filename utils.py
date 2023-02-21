@@ -36,10 +36,11 @@ class AlbumentationDataset(Dataset):
     self.train= train 
     self.image_size = image_size
     self.train_aug = A.Compose([
-                          A.Normalize(dataset_mean, dataset_std),
-                          A.CoarseDropout(max_holes=1, max_height=self.image_size//4, max_width=self.image_size//4, fill_value=dataset_mean), 
-                          A.RandomCrop(width=32, height=32, padding=4),
-                          A.RandomRotate90()
+                          A.PadIfNeeded(min_height=36, min_width=36, p=1)
+                          A.Normalize(dataset_mean, dataset_std, always_apply=True),
+                          A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean, p=0.5), 
+                          A.RandomCrop(width=32, height=32, p=0.5),
+                          A.RandomRotate90(p=0.5)
                       ])
     self.norm_aug = A.Compose([A.Normalize(dataset_mean, dataset_std)])
   def __len__(self):
