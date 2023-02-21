@@ -147,7 +147,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
   total_steps = len(train_loader)*Epochs
   step_size_up = len(train_loader) * int(round(Epochs * 0.20833333333))
   step_size_down = total_steps - step_size_up
-  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=len(train_loader), pct_start=step_size_up/total_steps, anneal_strategy = 'linear')
+  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=len(train_loader), pct_start=step_size_up/total_steps, anneal_strategy = 'cos')
   if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
@@ -172,5 +172,5 @@ print('Plotting Graphs')
 plot_graph(test_loss, test_acc, fig_size=(15,10))
 print('Displaying Sample Images from Dataset')
 images, target = next(iter(train_loader))
-visualize_images(images, target, classes=None, fig_size=(20, 10))
+visualize_images(images[:32], target, classes=None, fig_size=(15, 15))
 print('Main File Completed!!!')
