@@ -38,7 +38,7 @@ class AlbumentationDataset(Dataset):
     self.train_aug = A.Compose([
                           A.Normalize(dataset_mean, dataset_std),
                           A.CoarseDropout(max_holes=1, max_height=self.image_size//4, max_width=self.image_size//4, fill_value=dataset_mean), 
-                          A.RandomCrop(width=32, height=32, padding=4, pad_mode=A.BorderMode.REFLECT),
+                          A.RandomCrop(width=32, height=32, padding=4),
                           A.RandomRotate90()
                       ])
     self.norm_aug = A.Compose([A.Normalize(dataset_mean, dataset_std)])
