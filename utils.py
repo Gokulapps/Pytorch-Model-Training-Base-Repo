@@ -42,7 +42,7 @@ class AlbumentationDataset(Dataset):
                           A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean, p=0.5),
                           A.RandomRotate90(p=0.5)
                       ])
-    self.norm_aug = A.Compose([A.Normalize(dataset_mean, dataset_std)])
+    self.norm_aug = A.Compose([A.Normalize(dataset_mean, dataset_std, always_apply=True)])
   def __len__(self):
     return len(self.data)
   def __getitem__(self, index):
