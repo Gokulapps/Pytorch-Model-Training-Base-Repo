@@ -76,7 +76,7 @@ else:
 test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
 
 
-def train(model, device, train_loader, optimizer, l1_reg):
+def train(model, device, train_loader, optimizer, l1_reg, scheduler):
   global train_acc, train_loss
   model.train()
   pbar = tqdm(train_loader)
@@ -103,6 +103,7 @@ def train(model, device, train_loader, optimizer, l1_reg):
     accuracy = 100*correct/processed
     pbar.set_description(desc= f'Loss={loss.item()} Batch_id={batch_idx} Accuracy={accuracy:0.2f}')
     train_acc.append(accuracy)
+    scheduler.step()
 
 def test(model, device, test_loader, epoch):
   global best_acc, test_loss, test_acc
@@ -162,8 +163,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
   print('Model Training...')
   for epoch in range(start_epoch, Epochs+1):
     print("EPOCH:", epoch)
-    train(model, device, trainloader, optimizer, l1)
-    scheduler.step()
+    train(model, device, trainloader, optimizer, l1, scheduler)
     test(model, device, testloader, epoch)
 
 fit_model(model, device, train_loader, test_loader, False, True)
