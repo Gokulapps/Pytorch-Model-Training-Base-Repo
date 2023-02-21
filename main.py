@@ -32,6 +32,7 @@ warnings.filterwarnings("ignore")
 parser = argparse.ArgumentParser(description='Model Training on Selected PyTorch Dataset')
 parser.add_argument('dataset', default='CIFAR10', type=str, help='Provide Pytorch Datasets like CIFAR10, MNIST, FashionMNIST')
 parser.add_argument('epochs', default=20, type=int, help='Number of Epochs')
+parser.add_argument('batch_size', default=64, type=int, help='Batch Size')
 parser.add_argument('lr', default=0.001, type=float, help='Learning Rate')
 parser.add_argument('max_lr', default=0.017, type=float, help='Maximum Learning Rate for OneCyclePolicy')
 parser.add_argument('--augmentation', action='store_true', help='whether to Perform Augmentation or not')
@@ -69,10 +70,10 @@ test_dataset =  torchvisionDataset(root='./data', train=False, download=True, tr
 train_dataset_mean, train_dataset_std = get_mean_and_std(train_dataset, 3)
 test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
 if args.augmentation:
-    train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
+    train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
 else:
-    train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=False), batch_size=64, shuffle=True, num_workers=2, pin_memory = True)
-test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=64, shuffle=False, num_workers=2, pin_memory = True)
+    train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
+test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
 
 
 def train(model, device, train_loader, optimizer, l1_reg):
@@ -89,7 +90,7 @@ def train(model, device, train_loader, optimizer, l1_reg):
     loss = criterion(y_pred, target) 
     if l1_reg:
       l1 = 0
-      lambda_y = 0.00025
+      lambda_y = 0.000025
       for param in model.parameters():
         l1 += param.abs().sum()
       loss += lambda_y * l1
