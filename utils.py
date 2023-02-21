@@ -36,8 +36,8 @@ class AlbumentationDataset(Dataset):
     self.train= train 
     self.image_size = image_size
     self.train_aug = A.Compose([
-                          A.PadIfNeeded(min_height=36, min_width=36, p=1),
                           A.Normalize(dataset_mean, dataset_std, always_apply=True),
+                          A.PadIfNeeded(min_height=4, min_width=4),                       
                           A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean, p=0.5), 
                           A.RandomCrop(width=32, height=32, p=0.5),
                           A.RandomRotate90(p=0.5)
