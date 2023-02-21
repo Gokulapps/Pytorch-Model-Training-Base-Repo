@@ -144,7 +144,10 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
   else:
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
-  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, steps_per_epoch=len(train_loader), div_factor=10, pct_start=5/24)
+  total_steps = len(train_loader)*Epochs
+  step_size_up = len(train_loader) * int(round(Epochs * 0.20833333333))
+  step_size_down = total_steps - step_size_up
+  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=len(train_loader), pct_start=step_size_up, anneal_strategy = 'linear')
   if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
