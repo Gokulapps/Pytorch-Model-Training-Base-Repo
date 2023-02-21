@@ -6,7 +6,7 @@ class CustomResnet(nn.Module):
     def __init__(self):
         super(CustomResnet, self).__init__()
         # PrepLayer - Conv 3x3 s1, p1) >> BN >> RELU
-        self.prep_layer = nn.Sequential(nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride = 1, padding=1),
+        self.prep_layer = nn.Sequential(nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride = 1, padding=1, bias=False),
                                         nn.BatchNorm2d(64),
                                         nn.ReLU())
         # Layer 1
@@ -30,16 +30,16 @@ class CustomResnet(nn.Module):
         
         
     def xblock(self, in_channels, out_channels, kernel_size, stride, padding):
-        return nn.Sequential(nn.Conv2d(in_channels = in_channels, out_channels = out_channels, kernel_size = kernel_size, stride = stride, padding = padding),
+        return nn.Sequential(nn.Conv2d(in_channels = in_channels, out_channels = out_channels, kernel_size = kernel_size, stride = stride, padding = padding, bias=False),
                              nn.MaxPool2d(2, 2),
                              nn.BatchNorm2d(out_channels),
                              nn.ReLU())
     
     def ResBlock(self, in_channels, out_channels, kernel_size, stride, padding):
-        return nn.Sequential(nn.Conv2d(in_channels = in_channels, out_channels = out_channels, kernel_size = kernel_size, stride = stride, padding = padding),
+        return nn.Sequential(nn.Conv2d(in_channels = in_channels, out_channels = out_channels, kernel_size = kernel_size, stride = stride, padding = padding, bias=False),
                              nn.BatchNorm2d(out_channels),
                              nn.ReLU(), 
-                             nn.Conv2d(in_channels = in_channels, out_channels = out_channels, kernel_size = kernel_size, stride = stride, padding = padding),
+                             nn.Conv2d(in_channels = in_channels, out_channels = out_channels, kernel_size = kernel_size, stride = stride, padding = padding, bias=False),
                              nn.BatchNorm2d(out_channels),
                              nn.ReLU())
     
