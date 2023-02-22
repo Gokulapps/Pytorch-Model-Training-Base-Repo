@@ -37,7 +37,7 @@ class AlbumentationDataset(Dataset):
     self.train= train 
     self.image_size = image_size
     self.train_aug = A.Compose([
-                          A.pytorch.ToTensorv2(),
+                          A.pytorch.ToTensorV2(),
                           A.Normalize(dataset_mean, dataset_std, always_apply=True),
                           A.PadIfNeeded(min_height=4, min_width=4),
                           A.RandomCrop(width=32, height=32),
