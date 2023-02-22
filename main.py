@@ -52,28 +52,67 @@ if device == 'cuda':
   print("=> Parallelizing Training across Multiple GPU's")
   model = torch.nn.DataParallel(model)
 
+# class torchvisionDataset(dataset_class):
+#   def __init__(self, root='./data', train=True, download=True, transform=None):
+#     super().__init__(root=root, train=train, download=download, transform=transform)
+
+#   def __len__(self):
+#     return len(self.data)
+
+#   def __getitem__(self, index):
+#     image, label = self.data[index], self.targets[index]
+#     return image, label
+
 class torchvisionDataset(dataset_class):
   def __init__(self, root='./data', train=True, download=True, transform=None):
-    super().__init__(root=root, train=train, download=download, transform=transform)
+    super().__init__(root=root, train=train, download=download)
+    self.transform = transform                
 
   def __len__(self):
     return len(self.data)
 
   def __getitem__(self, index):
     image, label = self.data[index], self.targets[index]
+    if self.transform != None:
+        image = self.transform(image=image.numpy())['image']
     return image, label
+
+def define_transforms(train=True):
+    if train:
+        train_transform = A.Compose([A.pytorch.ToTensorV2(),
+                                     A.Normalize(dataset_mean, dataset_std, always_apply=True),
+                                     A.PadIfNeeded(min_height=4, min_width=4),
+                                     A.RandomCrop(width=32, height=32),
+                                     A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
+                                     A.RandomRotate90()  ])
+        return train_transforms
+    else:
+        test_transform = A.Compose([A.pytorch.ToTensorV2(),
+                                    A.Normalize(dataset_mean, dataset_std, always_apply=True)])
+        return test_transforms
 
 
 # transform = transforms.Compose([transforms.ToTensor()])
-train_dataset = torchvisionDataset(root='./data', train=True, download=True)
-test_dataset =  torchvisionDataset(root='./data', train=False, download=True)
-train_dataset_mean, train_dataset_std = get_mean_and_std(train_dataset, 3)
-test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
+train_dataset_mean, train_dataset_std = get_mean_and_std(dataset_class, 3, train=True)
+test_dataset_mean, test_dataset_std = get_mean_and_std(dataset_class, 3, train=False)
+print(f'Mean of the Training Dataset is {train_dataset_mean}, Standard Deviation of the Training Dataset is {train_dataset_std}')
+print(f'Mean of the Testing Dataset is {test_dataset_mean}, Standard Deviation of the Testing Dataset is {test_dataset_std}')
 if args.augmentation:
-    train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
+    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(train=True))
 else:
-    train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
-test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
+    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(train=False))
+test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=define_transforms(train=False))
+train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
+test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
+# train_dataset = torchvisionDataset(root='./data', train=True, download=True)
+# test_dataset =  torchvisionDataset(root='./data', train=False, download=True)
+# train_dataset_mean, train_dataset_std = get_mean_and_std(train_dataset, 3)
+# test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
+# if args.augmentation:
+#     train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
+# else:
+#     train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
+# test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
 
 
 def train(model, device, train_loader, optimizer, l1_reg, scheduler):
