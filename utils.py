@@ -151,19 +151,19 @@ def misclassified_images(model, device, testloader, limit=10):
         incorrect_predictions = []
         count = 0
         with torch.no_grad():
-        for data, target in testloader:
-          data, target = data.to(device), target.to(device)
-          output = model(data)
-          predictions = output.argmax(dim=1, keepdim=True)
-          incorrect_indices = predictions.ne(target.view_as(predictions)).nonzero(as_tuple=True)[0]
-          for index in incorrect_indices[:limit-count]:
-            incorrect_index = index.item()
-            incorrect_predictions.append([data[incorrect_index], predictions[incorrect_index], target[incorrect_index]])
+            for data, target in testloader:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                predictions = output.argmax(dim=1, keepdim=True)
+                incorrect_indices = predictions.ne(target.view_as(predictions)).nonzero(as_tuple=True)[0]
+            for index in incorrect_indices[:limit-count]:
+                incorrect_index = index.item()
+                incorrect_predictions.append([data[incorrect_index], predictions[incorrect_index], target[incorrect_index]])
             # [Original Data, Model Predictions, Actual Labels] is appended to the Global List 
-            count += 1
-          if count >= limit:
+                count += 1
+                if count >= limit:
+                    return incorrect_predictions
             return incorrect_predictions
-        return incorrect_predictions
     except Exception as e:
         print(e)
         print(f'Error in {misclassified_images.__name__} Block')
@@ -188,12 +188,12 @@ def plot_misclassified_images(incorrect_predictions, classes, row, col, limit, f
     try:
         fig = plt.figure(figsize=fig_size)
         for index in range(1, limit+1):
-          plt.subplot(row, col, index)
-          plt.axis('off')
-          image = (incorrect_predictions[index - 1][0].to('cpu').numpy() / 2) + 0.5
-          npimage = np.transpose(image, (1, 2, 0))
-          plt.title(f'Model Prediction : {classes[incorrect_predictions[index-1][1]]}, Actual Label : {classes[incorrect_predictions[index-1][2]]}')
-          plt.imshow(npimage, cmap='gray_r')
+            plt.subplot(row, col, index)
+            plt.axis('off')
+            image = (incorrect_predictions[index - 1][0].to('cpu').numpy() / 2) + 0.5
+            npimage = np.transpose(image, (1, 2, 0))
+            plt.title(f'Model Prediction : {classes[incorrect_predictions[index-1][1]]}, Actual Label : {classes[incorrect_predictions[index-1][2]]}')
+            plt.imshow(npimage, cmap='gray_r')
     except Exception as e:
         print(e)
         print(f'Error in {plot_misclassified_images.__name__} Block')
