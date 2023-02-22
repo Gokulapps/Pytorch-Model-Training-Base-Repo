@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import albumentations as A
+from albumentations.pytorch import ToTensorV2
 import warnings
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
