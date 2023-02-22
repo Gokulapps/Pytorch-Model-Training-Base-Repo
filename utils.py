@@ -44,7 +44,7 @@ class AlbumentationDataset(Dataset):
                           A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
                           A.RandomRotate90()
                       ])
-    self.norm_aug = A.Compose([A.pytorch.ToTensorv2(),
+    self.norm_aug = A.Compose([A.pytorch.ToTensorV2(),
                                A.Normalize(dataset_mean, dataset_std, always_apply=True)])
   def __len__(self):
     return len(self.data)
