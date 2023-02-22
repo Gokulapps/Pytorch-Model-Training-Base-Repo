@@ -49,8 +49,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # model = ResNet18().to(device)
 model = CustomResnet().to(device)
 if device == 'cuda':
-  print("=> Parallelizing Training across Multiple GPU's")
-  model = torch.nn.DataParallel(model)
+    print("=> Parallelizing Training across Multiple GPU's")
+    model = torch.nn.DataParallel(model)
 
 # class torchvisionDataset(dataset_class):
 #   def __init__(self, root='./data', train=True, download=True, transform=None):
@@ -65,31 +65,47 @@ if device == 'cuda':
 
 class torchvisionDataset(dataset_class):
   def __init__(self, root='./data', train=True, download=True, transform=None):
-    super().__init__(root=root, train=train, download=download)
-    self.transform = transform                
+    try:
+        super().__init__(root=root, train=train, download=download)
+        self.transform = transform   
+    except Exception as e:
+        print(e)
+        print(f'Error in {self.__init__.__name__} Block of {type(self).__name__} Class')
 
   def __len__(self):
-    return len(self.data)
+    try:
+        return len(self.data)
+    except Exception as e:
+        print(e)
+        print(f'Error in {self.__len__.__name__} Block of {type(self).__name__} Class')
 
   def __getitem__(self, index):
-    image, label = self.data[index], self.targets[index]
-    if self.transform != None:
-        image = self.transform(image=image.numpy())['image']
-    return image, label
+    try:
+        image, label = self.data[index], self.targets[index]
+        if self.transform != None:
+            image = self.transform(image=image.numpy())['image']
+        return image, label
+    except Exception as e:
+        print(e)
+        print(f'Error in {self.__getitem__.__name__} Block of {type(self).__name__} Class')
 
 def define_transforms(train=True):
-    if train:
-        train_transform = A.Compose([A.pytorch.ToTensorV2(),
-                                     A.Normalize(dataset_mean, dataset_std, always_apply=True),
-                                     A.PadIfNeeded(min_height=4, min_width=4),
-                                     A.RandomCrop(width=32, height=32),
-                                     A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
-                                     A.RandomRotate90()  ])
-        return train_transforms
-    else:
-        test_transform = A.Compose([A.pytorch.ToTensorV2(),
-                                    A.Normalize(dataset_mean, dataset_std, always_apply=True)])
-        return test_transforms
+    try:
+        if train:
+            train_transform = A.Compose([A.pytorch.ToTensorV2(),
+                                         A.Normalize(dataset_mean, dataset_std, always_apply=True),
+                                         A.PadIfNeeded(min_height=4, min_width=4),
+                                         A.RandomCrop(width=32, height=32),
+                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
+                                         A.RandomRotate90()  ])
+            return train_transforms
+        else:
+            test_transform = A.Compose([A.pytorch.ToTensorV2(),
+                                        A.Normalize(dataset_mean, dataset_std, always_apply=True)])
+            return test_transforms
+    except Exception as e:
+        print(e)
+        print(f'Error in {define_transforms.__name__} Block')
 
 
 # transform = transforms.Compose([transforms.ToTensor()])
@@ -116,95 +132,108 @@ test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False
 
 
 def train(model, device, train_loader, optimizer, l1_reg, scheduler):
-  global train_acc, train_loss
-  model.train()
-  pbar = tqdm(train_loader)
-  correct = 0
-  processed = 0
-  criterion = nn.CrossEntropyLoss()
-  for batch_idx, (images, target) in enumerate(pbar):
-    images, target = images.to(device), target.to(device)
-    optimizer.zero_grad()
-    y_pred = model(images)
-    loss = criterion(y_pred, target) 
-    if l1_reg:
-      l1 = 0
-      lambda_y = 0.000025
-      for param in model.parameters():
-        l1 += param.abs().sum()
-      loss += lambda_y * l1
-    train_loss.append(loss)
-    loss.backward()
-    optimizer.step()  
-    scheduler.step()
-    pred = y_pred.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-    correct += pred.eq(target.view_as(pred)).sum().item()
-    processed += len(images)
-    accuracy = 100*correct/processed
-    pbar.set_description(desc= f'Loss={loss.item()} Batch_id={batch_idx} Accuracy={accuracy:0.2f}')
-    train_acc.append(accuracy)
+    try:
+        global train_acc, train_loss
+        model.train()
+        pbar = tqdm(train_loader)
+        correct = 0
+        processed = 0
+        criterion = nn.CrossEntropyLoss()
+        for batch_idx, (images, target) in enumerate(pbar):
+            images, target = images.to(device), target.to(device)
+            optimizer.zero_grad()
+            y_pred = model(images)
+            loss = criterion(y_pred, target) 
+            if l1_reg:
+              l1 = 0
+              lambda_y = 0.000025
+              for param in model.parameters():
+                l1 += param.abs().sum()
+              loss += lambda_y * l1
+            train_loss.append(loss)
+            loss.backward()
+            optimizer.step()  
+            scheduler.step()
+            pred = y_pred.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+            correct += pred.eq(target.view_as(pred)).sum().item()
+            processed += len(images)
+            accuracy = 100*correct/processed
+            pbar.set_description(desc= f'Loss={loss.item()} Batch_id={batch_idx} Accuracy={accuracy:0.2f}')
+            train_acc.append(accuracy)
+    except Exception as e:
+        print(e)
+        print(f'Error in {train.__name__} Block')
+   
 
 def test(model, device, test_loader, epoch):
-  global best_acc, test_loss, test_acc
-  model.eval()
-  loss = 0
-  correct = 0
-  criterion = nn.CrossEntropyLoss()
-  with torch.no_grad():
-    for data, target in test_loader:
-      data, target = data.to(device), target.to(device)
-      output = model(data)
-      loss += criterion(output, target).item()  # sum up batch loss
-      pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-      correct += pred.eq(target.view_as(pred)).sum().item()
+    try:
+        global best_acc, test_loss, test_acc
+        model.eval()
+        loss = 0
+        correct = 0
+        criterion = nn.CrossEntropyLoss()
+        with torch.no_grad():
+            for data, target in test_loader:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                loss += criterion(output, target).item()  # sum up batch loss
+                pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+                correct += pred.eq(target.view_as(pred)).sum().item()
 
-  loss /= len(test_loader.dataset)
-  test_loss.append(loss)
-  accuracy = 100. * correct / len(test_loader.dataset)
-  print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
-      loss, correct, len(test_loader.dataset), accuracy))
-  
-  test_acc.append(accuracy)
-  if accuracy > best_acc:
-      state = {
-          'model': model.state_dict(),
-          'accuracy': accuracy,
-          'epoch': epoch,
-          #'optimizer': optimizer.state_dict()
-      }
-      if not os.path.isdir('checkpoint'):
-          os.mkdir('checkpoint')
-      torch.save(state, './checkpoint/model_state.pth')
-      torch.save(model, './checkpoint/model.pth')
-      best_acc = accuracy
+        loss /= len(test_loader.dataset)
+        test_loss.append(loss)
+        accuracy = 100. * correct / len(test_loader.dataset)
+        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+               loss, correct, len(test_loader.dataset), accuracy))
+
+        test_acc.append(accuracy)
+        if accuracy > best_acc:
+            state = {
+              'model': model.state_dict(),
+              'accuracy': accuracy,
+              'epoch': epoch,
+              #'optimizer': optimizer.state_dict()
+            }
+        if not os.path.isdir('checkpoint'):
+            os.mkdir('checkpoint')
+            torch.save(state, './checkpoint/model_state.pth')
+            torch.save(model, './checkpoint/model.pth')
+            best_acc = accuracy
+     except Exception as e:
+        print(e)
+        print(f'Error in {test.__name__} Block')
 
 def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
-  global best_acc, Epochs, test_loss, test_acc
-  if l2:
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
-  else:
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
-  steps_per_epoch = len(train_loader) 
-  total_steps = steps_per_epoch * Epochs
-  step_size_up = steps_per_epoch * 5
-  step_size_down = total_steps - step_size_up
-  scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=steps_per_epoch, pct_start=step_size_up/total_steps)
-  if args.resume:
-    # Load checkpoint.
-    print('==> Resuming from checkpoint..')
-    assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
-    checkpoint = torch.load('./checkpoint/model.pth')
-    model.load_state_dict(checkpoint['model'])
-    #optimizer.load_state_dict(checkpoint['optimizer'])
-    best_acc = checkpoint['accuracy']
-    start_epoch = checkpoint['epoch']
-  else:
-    start_epoch = 1
-  print('Model Training...')
-  for epoch in range(start_epoch, Epochs+1):
-    print("EPOCH:", epoch)
-    train(model, device, trainloader, optimizer, l1, scheduler)
-    test(model, device, testloader, epoch)
+    try:
+        global best_acc, Epochs, test_loss, test_acc
+        if l2:
+            optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
+        else:
+            optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
+        steps_per_epoch = len(train_loader) 
+        total_steps = steps_per_epoch * Epochs
+        step_size_up = steps_per_epoch * 5
+        step_size_down = total_steps - step_size_up
+        scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=steps_per_epoch, pct_start=step_size_up/total_steps)
+        if args.resume:
+            # Load checkpoint.
+            print('==> Resuming from checkpoint..')
+            assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
+            checkpoint = torch.load('./checkpoint/model.pth')
+            model.load_state_dict(checkpoint['model'])
+            #optimizer.load_state_dict(checkpoint['optimizer'])
+            best_acc = checkpoint['accuracy']
+            start_epoch = checkpoint['epoch']
+        else:
+            start_epoch = 1
+        print('Model Training...')
+        for epoch in range(start_epoch, Epochs+1):
+            print("EPOCH:", epoch)
+            train(model, device, trainloader, optimizer, l1, scheduler)
+            test(model, device, testloader, epoch)
+    except Exception as e:
+        print(e)
+        print(f'Error in {fit_model.__name__} Block')
 
 fit_model(model, device, train_loader, test_loader, False, True)
 print('Model Saved')
