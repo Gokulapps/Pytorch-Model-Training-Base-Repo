@@ -99,11 +99,11 @@ def define_transforms(train=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5
                                          A.RandomCrop(width=32, height=32),
                                          A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
                                          A.RandomRotate90()  ])
-            return train_transforms
+            return train_transform
         else:
             test_transform = A.Compose([A.pytorch.ToTensorV2(),
                                         A.Normalize(dataset_mean, dataset_std, always_apply=True)])
-            return test_transforms
+            return test_transform
     except Exception as e:
         print(e)
         print(f'Error in {define_transforms.__name__} Block')
