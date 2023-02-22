@@ -47,7 +47,7 @@ class AlbumentationDataset(Dataset):
                               ])
             self.norm_aug = A.Compose([A.pytorch.ToTensorV2(),
                                        A.Normalize(dataset_mean, dataset_std, always_apply=True)])
-         except Exception as e:
+        except Exception as e:
             print(e)
             print(f'Error in {self.__init__.__name__} Block of {type(self).__name__} Class')
     def __len__(self):
