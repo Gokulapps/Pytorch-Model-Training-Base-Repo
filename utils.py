@@ -54,7 +54,7 @@ class AlbumentationDataset(Dataset):
       image = self.train_aug(image=np.array(image))['image']
     else:
       image = self.norm_aug(image=np.array(image))['image']
-    image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+#     image = np.transpose(image, (2, 0, 1)).astype(np.float32)
     return torch.tensor(image, dtype=torch.float), label
 
 def get_mean_and_std(dataset, no_channels):
