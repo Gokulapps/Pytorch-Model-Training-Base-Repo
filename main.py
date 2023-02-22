@@ -94,11 +94,12 @@ def define_transforms(train=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5
     try:
         if train:
             train_transform = A.Compose([A.pytorch.ToTensorV2(),
-                                         A.Normalize(dataset_mean, dataset_std, always_apply=True),
-                                         A.PadIfNeeded(min_height=4, min_width=4),
+                                         A.Normalize(dataset_mean, dataset_std, always_apply=True, p=1),
+                                         A.PadIfNeeded(min_height=36, min_width=36, p=1),
                                          A.RandomCrop(width=32, height=32),
-                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
-                                         A.RandomRotate90()  ])
+                                         A.RandomRotate90(),
+                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean) 
+                                         ])
             return train_transform
         else:
             test_transform = A.Compose([A.pytorch.ToTensorV2(),
