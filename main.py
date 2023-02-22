@@ -84,8 +84,8 @@ class torchvisionDataset(dataset_class):
         image, label = self.data[index], self.targets[index]
         if self.transform != None:
             image = self.transform(image=image.numpy())['image']
-        image = np.transpose(image, (2, 0, 1)) 
-        return image, label
+        image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+        return torch.tensor(image, dtype=torch.float), label 
     except Exception as e:
         print(e)
         print(f'Error in {self.__getitem__.__name__} Block of {type(self).__name__} Class')
