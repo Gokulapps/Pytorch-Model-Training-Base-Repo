@@ -64,9 +64,9 @@ class torchvisionDataset(dataset_class):
     return image, label
 
 
-transform = transforms.Compose([transforms.ToTensor()])
-train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=transform)
-test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=transform)
+# transform = transforms.Compose([transforms.ToTensor()])
+train_dataset = torchvisionDataset(root='./data', train=True, download=True)
+test_dataset =  torchvisionDataset(root='./data', train=False, download=True)
 train_dataset_mean, train_dataset_std = get_mean_and_std(train_dataset, 3)
 test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
 if args.augmentation:
