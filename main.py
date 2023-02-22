@@ -199,7 +199,7 @@ def test(model, device, test_loader, epoch):
             torch.save(state, './checkpoint/model_state.pth')
             torch.save(model, './checkpoint/model.pth')
             best_acc = accuracy
-     except Exception as e:
+    except Exception as e:
         print(e)
         print(f'Error in {test.__name__} Block')
 
