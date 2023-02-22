@@ -90,7 +90,7 @@ class torchvisionDataset(dataset_class):
         print(e)
         print(f'Error in {self.__getitem__.__name__} Block of {type(self).__name__} Class')
 
-def define_transforms(train=True):
+def define_transforms(train=True, dataset_mean, dataset_std):
     try:
         if train:
             train_transform = A.Compose([A.pytorch.ToTensorV2(),
@@ -115,10 +115,10 @@ test_dataset_mean, test_dataset_std = get_mean_and_std(dataset_class, 3, train=F
 print(f'Mean of the Training Dataset is {train_dataset_mean}, Standard Deviation of the Training Dataset is {train_dataset_std}')
 print(f'Mean of the Testing Dataset is {test_dataset_mean}, Standard Deviation of the Testing Dataset is {test_dataset_std}')
 if args.augmentation:
-    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(train=True))
+    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(train=True, train_dataset_mean, train_dataset_std))
 else:
-    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(train=False))
-test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=define_transforms(train=False))
+    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(train=False, train_dataset_mean, train_dataset_std))
+test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=define_transforms(train=False, test_dataset_mean, test_dataset_std))
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
 # train_dataset = torchvisionDataset(root='./data', train=True, download=True)
