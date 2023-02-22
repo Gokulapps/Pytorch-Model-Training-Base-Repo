@@ -112,8 +112,8 @@ def define_transforms(train=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5
 # transform = transforms.Compose([transforms.ToTensor()])
 train_dataset_mean, train_dataset_std = get_mean_and_std(dataset_class, 3, train=True)
 test_dataset_mean, test_dataset_std = get_mean_and_std(dataset_class, 3, train=False)
-print(f'Mean of the Training Dataset is {train_dataset_mean}, Standard Deviation of the Training Dataset is {train_dataset_std}')
-print(f'Mean of the Testing Dataset is {test_dataset_mean}, Standard Deviation of the Testing Dataset is {test_dataset_std}')
+# print(f'Mean of the Training Dataset is {train_dataset_mean}, Standard Deviation of the Training Dataset is {train_dataset_std}')
+# print(f'Mean of the Testing Dataset is {test_dataset_mean}, Standard Deviation of the Testing Dataset is {test_dataset_std}')
 if args.augmentation:
     train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(True, train_dataset_mean, train_dataset_std))
 else:
