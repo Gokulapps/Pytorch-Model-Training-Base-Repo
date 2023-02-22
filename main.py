@@ -84,7 +84,7 @@ class torchvisionDataset(dataset_class):
         image, label = self.data[index], self.targets[index]
         if self.transform != None:
             image = self.transform(image=np.array(image))['image']
-        image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+        image = np.transpose(np.array(image), (2, 0, 1)).astype(np.float32)
         return torch.tensor(image, dtype=torch.float), label 
     except Exception as e:
         print(e)
