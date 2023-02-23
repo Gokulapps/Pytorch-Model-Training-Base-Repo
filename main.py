@@ -52,17 +52,6 @@ if device == 'cuda':
     print("=> Parallelizing Training across Multiple GPU's")
     model = torch.nn.DataParallel(model)
 
-# class torchvisionDataset(dataset_class):
-#   def __init__(self, root='./data', train=True, download=True, transform=None):
-#     super().__init__(root=root, train=train, download=download, transform=transform)
-
-#   def __len__(self):
-#     return len(self.data)
-
-#   def __getitem__(self, index):
-#     image, label = self.data[index], self.targets[index]
-#     return image, label
-
 class torchvisionDataset(dataset_class):
     def __init__(self, root='./data', train=True, download=True, transform=transforms.ToTensor(), alb_aug=None):
         try:
@@ -98,41 +87,26 @@ class torchvisionDataset(dataset_class):
 def define_transforms(aug=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 0.5, 0.5)):
     try:
         if aug:
+            transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=dataset_mean, std=dataset_std)])
             augmentation = A.Compose([A.PadIfNeeded(min_height=36, min_width=36, p=1),
                           A.RandomCrop(width=32, height=32),
                           A.Flip(),
                           A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean)])
-            return augmentation
+            return transform, augmentation
         else:
             transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=dataset_mean, std=dataset_std)])
-            return transform
+            return transform, None
     except Exception as e:
         print(e)
         print(f'Error in {define_transforms.__name__} Block')
 
-
-# transform = transforms.Compose([transforms.ToTensor()])
 train_dataset_mean, train_dataset_std = get_mean_and_std(dataset_class, 3, train=True)
 test_dataset_mean, test_dataset_std = get_mean_and_std(dataset_class, 3, train=False)
-# print(f'Mean of the Training Dataset is {train_dataset_mean}, Standard Deviation of the Training Dataset is {train_dataset_std}')
-# print(f'Mean of the Testing Dataset is {test_dataset_mean}, Standard Deviation of the Testing Dataset is {test_dataset_std}')
-if args.augmentation:
-    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(True, train_dataset_mean, train_dataset_std))
-else:
-    train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=define_transforms(False, train_dataset_mean, train_dataset_std))
-test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=define_transforms(False, test_dataset_mean, test_dataset_std))
+transforms = define_transforms(args.augmentation, train_dataset_mean, train_dataset_std)
+train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=transforms[0], alb_aug=transforms[1])
+test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=transforms[0], alb_aug=None)
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
-# train_dataset = torchvisionDataset(root='./data', train=True, download=True)
-# test_dataset =  torchvisionDataset(root='./data', train=False, download=True)
-# train_dataset_mean, train_dataset_std = get_mean_and_std(train_dataset, 3)
-# test_dataset_mean, test_dataset_std = get_mean_and_std(test_dataset, 3)
-# if args.augmentation:
-#     train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=True), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
-# else:
-#     train_loader = DataLoader(AlbumentationDataset(train_dataset, train_dataset_mean, train_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
-# test_loader = DataLoader(AlbumentationDataset(test_dataset, test_dataset_mean, test_dataset_std, 32, train=False), batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
-
 
 def train(model, device, train_loader, optimizer, l1_reg, scheduler):
     try:
