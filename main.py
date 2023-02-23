@@ -64,46 +64,42 @@ if device == 'cuda':
 #     return image, label
 
 class torchvisionDataset(dataset_class):
-  def __init__(self, root='./data', train=True, download=True, transform=None):
-    try:
-        super().__init__(root=root, train=train, download=download)
-        self.transform = transform   
-    except Exception as e:
-        print(e)
-        print(f'Error in {self.__init__.__name__} Block of {type(self).__name__} Class')
+    def __init__(self, root='./data', train=True, download=True, transform=None):
+        try:
+            super().__init__(root=root, train=train, download=download, transform=transform)
+        except Exception as e:
+            print(e)
+            print(f'Error in {self.__init__.__name__} Block of {type(self).__name__} Class')
 
-  def __len__(self):
-    try:
-        return len(self.data)
-    except Exception as e:
-        print(e)
-        print(f'Error in {self.__len__.__name__} Block of {type(self).__name__} Class')
-
-  def __getitem__(self, index):
-    try:
-        image, label = self.data[index], self.targets[index]
-        if self.transform != None:
-            image = self.transform(image=np.array(image))['image']
-        image = np.transpose(np.array(image), (2, 0, 1)).astype(np.float32)
-        return torch.tensor(image, dtype=torch.float), label 
-    except Exception as e:
-        print(e)
-        print(f'Error in {self.__getitem__.__name__} Block of {type(self).__name__} Class')
+    def __len__(self):
+        try:
+            return len(self.data)
+        except Exception as e:
+            print(e)
+            print(f'Error in {self.__len__.__name__} Block of {type(self).__name__} Class')
+    
+    def __getitem__(self, index):
+        try:
+            image, label = self.data[index], self.targets[index]
+            if self.transform != None:
+                image = self.transform(image=image/np.max(image))['image']
+            image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+            return torch.tensor(image, dtype=torch.float), label 
+        except Exception as e:
+            print(e)
+            print(f'Error in {self.__getitem__.__name__} Block of {type(self).__name__} Class')
 
 def define_transforms(train=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 0.5, 0.5)):
     try:
         if train:
-            train_transform = A.Compose([A.pytorch.ToTensorV2(),
-                                         A.Normalize(dataset_mean, dataset_std, always_apply=True, p=1),
+            train_transform = A.Compose([A.Normalize(dataset_mean, dataset_std, always_apply=True),
                                          A.PadIfNeeded(min_height=36, min_width=36, p=1),
                                          A.RandomCrop(width=32, height=32),
-                                         A.RandomRotate90(),
-                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean) 
-                                         ])
+                                         A.Flip(),
+                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean))])
             return train_transform
         else:
-            test_transform = A.Compose([A.pytorch.ToTensorV2(),
-                                        A.Normalize(dataset_mean, dataset_std, always_apply=True)])
+            test_transform = A.Compose([A.Normalize(dataset_mean, dataset_std, always_apply=True)])
             return test_transform
     except Exception as e:
         print(e)
