@@ -150,8 +150,7 @@ def train(model, device, train_loader, optimizer, l1_reg, scheduler):
               loss += lambda_y * l1
             train_loss.append(loss)
             loss.backward()
-            optimizer.step()  
-            scheduler.step()
+            optimizer.step() 
             pred = y_pred.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
             processed += len(images)
@@ -209,8 +208,8 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
         else:
             optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
         steps_per_epoch = len(train_loader) 
-        total_steps = steps_per_epoch * Epochs
-        step_size_up = steps_per_epoch * 5
+        total_steps = Epochs # steps_per_epoch * Epochs
+        step_size_up = 5 # steps_per_epoch * 5
         step_size_down = total_steps - step_size_up
         scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=steps_per_epoch, pct_start=step_size_up/total_steps)
         if args.resume:
@@ -228,6 +227,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
         for epoch in range(start_epoch, Epochs+1):
             print("EPOCH:", epoch)
             train(model, device, trainloader, optimizer, l1, scheduler)
+            scheduler.step()
             test(model, device, testloader, epoch)
     except Exception as e:
         print(e)
