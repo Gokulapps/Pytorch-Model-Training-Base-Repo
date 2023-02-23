@@ -86,15 +86,14 @@ class torchvisionDataset(dataset_class):
 
 def define_transforms(aug=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 0.5, 0.5)):
     try:
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=dataset_mean, std=dataset_std)])
         if aug:
-            transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=dataset_mean, std=dataset_std)])
             augmentation = A.Compose([A.PadIfNeeded(min_height=36, min_width=36, p=1),
                           A.RandomCrop(width=32, height=32),
                           A.Flip(),
                           A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean)])
             return transform, augmentation
         else:
-            transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=dataset_mean, std=dataset_std)])
             return transform, None
     except Exception as e:
         print(e)
