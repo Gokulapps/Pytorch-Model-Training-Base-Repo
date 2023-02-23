@@ -82,7 +82,7 @@ class torchvisionDataset(dataset_class):
         try:
             image, label = self.data[index], self.targets[index]
             if self.transform != None:
-                image = self.transform(image=image/np.max(image))['image']
+                image = self.transform(image=image)['image']
             image = np.transpose(image, (2, 0, 1)).astype(np.float32)
             return torch.tensor(image, dtype=torch.float), label 
         except Exception as e:
@@ -92,11 +92,11 @@ class torchvisionDataset(dataset_class):
 def define_transforms(train=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 0.5, 0.5)):
     try:
         if train:
-            train_transform = A.Compose([A.Normalize(dataset_mean, dataset_std, always_apply=True),
-                                         A.PadIfNeeded(min_height=36, min_width=36, p=1),
+            train_transform = A.Compose([A.PadIfNeeded(min_height=36, min_width=36, p=1),
                                          A.RandomCrop(width=32, height=32),
                                          A.Flip(),
-                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean)])
+                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
+                                         A.Normalize(dataset_mean, dataset_std, always_apply=True)])
             return train_transform
         else:
             test_transform = A.Compose([A.Normalize(dataset_mean, dataset_std, always_apply=True)])
