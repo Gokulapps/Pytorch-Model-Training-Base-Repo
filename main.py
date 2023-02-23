@@ -64,9 +64,10 @@ if device == 'cuda':
 #     return image, label
 
 class torchvisionDataset(dataset_class):
-    def __init__(self, root='./data', train=True, download=True, transform=None):
+    def __init__(self, root='./data', train=True, download=True, transform=transforms.ToTensor(), alb_aug=None):
         try:
             super().__init__(root=root, train=train, download=download, transform=transform)
+            self.alb_aug = alb_aug
         except Exception as e:
             print(e)
             print(f'Error in {self.__init__.__name__} Block of {type(self).__name__} Class')
@@ -82,25 +83,29 @@ class torchvisionDataset(dataset_class):
         try:
             image, label = self.data[index], self.targets[index]
             if self.transform != None:
-                image = self.transform(image=image)['image']
-            image = np.transpose(image, (2, 0, 1)).astype(np.float32)
-            return torch.tensor(image, dtype=torch.float), label 
+                image = self.transform(image)
+            if self.alb_aug != None:
+                image = self.alb_aug(image=np.transpose(np.array(image), (1, 2, 0)))['image']
+                image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+                return torch.tensor(image, dtype=torch.float), label
+            else:
+                return image, label 
         except Exception as e:
             print(e)
             print(f'Error in {self.__getitem__.__name__} Block of {type(self).__name__} Class')
 
-def define_transforms(train=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 0.5, 0.5)):
+
+def define_transforms(aug=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 0.5, 0.5)):
     try:
-        if train:
-            train_transform = A.Compose([A.PadIfNeeded(min_height=36, min_width=36, p=1),
-                                         A.RandomCrop(width=32, height=32),
-                                         A.Flip(),
-                                         A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean),
-                                         A.Normalize(dataset_mean, dataset_std, always_apply=True)])
-            return train_transform
+        if aug:
+            augmentation = A.Compose([A.PadIfNeeded(min_height=36, min_width=36, p=1),
+                          A.RandomCrop(width=32, height=32),
+                          A.Flip(),
+                          A.CoarseDropout(max_holes=1, max_height=8, max_width=8, fill_value=dataset_mean)])
+            return augmentation
         else:
-            test_transform = A.Compose([A.Normalize(dataset_mean, dataset_std, always_apply=True)])
-            return test_transform
+            transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=dataset_mean, std=dataset_std)])
+            return transform
     except Exception as e:
         print(e)
         print(f'Error in {define_transforms.__name__} Block')
