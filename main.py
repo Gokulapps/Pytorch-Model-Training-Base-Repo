@@ -163,14 +163,14 @@ def test(model, device, test_loader, epoch):
 
         test_acc.append(accuracy)
         if accuracy > best_acc:
+            if not os.path.isdir('checkpoint'):
+                os.mkdir('checkpoint')
             state = {
               'model': model.state_dict(),
               'accuracy': accuracy,
               'epoch': epoch,
               #'optimizer': optimizer.state_dict()
             }
-        if not os.path.isdir('checkpoint'):
-            os.mkdir('checkpoint')
             torch.save(state, './checkpoint/model_state.pth')
             torch.save(model, './checkpoint/model.pth')
             best_acc = accuracy
@@ -194,7 +194,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
             # Load checkpoint.
             print('==> Resuming from checkpoint..')
             assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
-            checkpoint = torch.load('./checkpoint/model.pth')
+            checkpoint = torch.load('./checkpoint/model_state.pth')
             model.load_state_dict(checkpoint['model'])
             #optimizer.load_state_dict(checkpoint['optimizer'])
             best_acc = checkpoint['accuracy']
@@ -211,7 +211,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
         print(e)
         print(f'Error in {fit_model.__name__} Block')
 
-fit_model(model, device, train_loader, test_loader, False, True)
+fit_model(model, device, train_loader, test_loader, False, False)
 print('Model Saved')
 print('Plotting Graphs')
 plot_graph(test_loss, test_acc, fig_size=(15,10))
