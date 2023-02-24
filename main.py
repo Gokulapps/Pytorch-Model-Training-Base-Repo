@@ -48,8 +48,8 @@ test_loss = []
 test_acc = []
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # model = ResNet18().to(device)
-model_1 = CustomResnet().to(device)
-model = deepcopy(model)
+model_org = CustomResnet().to(device)
+model = deepcopy(model_org)
 if device == 'cuda':
     print("=> Parallelizing Training across Multiple GPU's")
     model = torch.nn.DataParallel(model)
