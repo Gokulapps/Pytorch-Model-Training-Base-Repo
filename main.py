@@ -27,6 +27,7 @@ from torch.optim.lr_scheduler import OneCycleLR
 from torchvision import datasets, transforms
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
+from copy import deepcopy
 warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser(description='Model Training on Selected PyTorch Dataset')
@@ -47,7 +48,8 @@ test_loss = []
 test_acc = []
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # model = ResNet18().to(device)
-model = CustomResnet().to(device)
+model_1 = CustomResnet().to(device)
+model = deepcopy(model)
 if device == 'cuda':
     print("=> Parallelizing Training across Multiple GPU's")
     model = torch.nn.DataParallel(model)
