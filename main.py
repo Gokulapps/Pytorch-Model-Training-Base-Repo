@@ -53,6 +53,7 @@ model_exp = deepcopy(model)
 if device == 'cuda':
     print("=> Parallelizing Training across Multiple GPU's")
     model = torch.nn.DataParallel(model)
+    model_exp = torch.nn.DataParallel(model_exp)
 
 class torchvisionDataset(dataset_class):
     def __init__(self, root='./data', train=True, download=True, transform=transforms.ToTensor(), alb_aug=None):
