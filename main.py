@@ -35,7 +35,7 @@ parser.add_argument('dataset', default='CIFAR10', type=str, help='Provide Pytorc
 parser.add_argument('epochs', default=20, type=int, help='Number of Epochs')
 parser.add_argument('batch_size', default=64, type=int, help='Batch Size')
 parser.add_argument('lr', default=0.001, type=float, help='Learning Rate')
-parser.add_argument('max_lr', default=0.017, type=float, help='Maximum Learning Rate for OneCyclePolicy')
+# parser.add_argument('max_lr', default=0.017, type=float, help='Maximum Learning Rate for OneCyclePolicy')
 parser.add_argument('--augmentation', action='store_true', help='whether to Perform Augmentation or not')
 parser.add_argument('--resume', '-r', action='store_true', help='Resume from checkpoint')
 args = parser.parse_args()
@@ -48,8 +48,8 @@ test_loss = []
 test_acc = []
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # model = ResNet18().to(device)
-model_org = CustomResnet().to(device)
-model = deepcopy(model_org)
+model= CustomResnet().to(device)
+model_exp = deepcopy(model)
 if device == 'cuda':
     print("=> Parallelizing Training across Multiple GPU's")
     model = torch.nn.DataParallel(model)
@@ -187,11 +187,12 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
             optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
         else:
             optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
-        steps_per_epoch = 1 # len(train_loader) 
-        total_steps = Epochs # steps_per_epoch * Epochs
-        step_size_up = 5 # steps_per_epoch * 5
+        max_lr = find_optimal_lr(model_exp, device, train_loader, optimizer, criterion, end_lr=4)
+        steps_per_epoch = len(train_loader) 
+        total_steps = steps_per_epoch * Epochs
+        step_size_up = steps_per_epoch * 5
         step_size_down = total_steps - step_size_up
-        scheduler = OneCycleLR(optimizer, max_lr=args.max_lr, epochs=Epochs, steps_per_epoch=len(train_loader), pct_start=5/24, div_factor=10, three_phase=False, final_div_factor=50)
+        scheduler = OneCycleLR(optimizer, max_lr=max_lr, epochs=Epochs, total_steps=total_steps, steps_per_epoch=steps_per_epoch, pct_start=step_size_up/total_steps, div_factor=10, three_phase=False, final_div_factor=50)
         if args.resume:
             # Load checkpoint.
             print('==> Resuming from checkpoint..')
