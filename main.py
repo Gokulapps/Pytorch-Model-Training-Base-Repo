@@ -187,7 +187,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
             optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
         else:
             optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
-        max_lr = find_optimal_lr(model_exp, device, train_loader, optimizer, criterion, end_lr=4)
+        max_lr = find_optimal_lr(model_exp, device, train_loader, optimizer, nn.CrossEntropyLoss(), end_lr=4)
         steps_per_epoch = len(train_loader) 
         total_steps = steps_per_epoch * Epochs
         step_size_up = steps_per_epoch * 5
