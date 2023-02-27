@@ -135,13 +135,13 @@ def model_summary(model, input_size):
 def find_optimal_lr(model, device, train_loader, optimizer, criterion, end_lr=2, start_lr=None, num_iter=200, step_mode='exp', diverge_th=5):
     try:
         lr_finder = LRFinder(model, optimizer, criterion, device=device)
-        lr_finder.range_test(train_loader, end_lr=end_lr, num_iter=num_iter, step_mode=step_mode, diverge_th=diverge_th) 
-        lr_finder.plot()    
+        lr_finder.range_test(train_loader, end_lr=end_lr, num_iter=num_iter, step_mode=step_mode, diverge_th=diverge_th)    
         min_loss = min(lr_finder.history['loss'])
         max_lr = lr_finder.history['lr'][np.argmin(lr_finder.history['loss'], axis=0)] 
-        print("Min Loss = {}, Max LR = {}".format(min_loss, max_lr))
+        print("Maximum Learning Rate Found by LRFinder = {}".format(max_lr))
         # Reset the model and optimizer to initial state    
         lr_finder.reset()    
+        return max_lr
     except Exception as e:
         print(e)
         print(f'Error in {find_optimal_lr.__name__} Block')
