@@ -180,14 +180,15 @@ def test(model, device, test_loader, epoch):
         print(e)
         print(f'Error in {test.__name__} Block')
 
-def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
+def fit_model(model, model_exp, device, trainloader, testloader, l1=False, l2=False):
     try:
         global best_acc, Epochs, test_loss, test_acc
         if l2:
             optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
         else:
             optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
-        max_lr = find_optimal_lr(model_exp, device, train_loader, optimizer, nn.CrossEntropyLoss(), end_lr=4)
+        optimizer_exp = optim.SGD(model_exp.parameters(), lr=args.lr, momentum=0.9)
+        max_lr = find_optimal_lr(model_exp, device, train_loader, optimizer_exp, nn.CrossEntropyLoss(), end_lr=4)
         steps_per_epoch = len(train_loader) 
         total_steps = steps_per_epoch * Epochs
         step_size_up = steps_per_epoch * 5
@@ -214,7 +215,7 @@ def fit_model(model, device, trainloader, testloader, l1=False, l2=False):
         print(e)
         print(f'Error in {fit_model.__name__} Block')
 
-fit_model(model, device, train_loader, test_loader, False, False)
+fit_model(model, model_exp, device, train_loader, test_loader, False, False)
 print('Model Saved')
 print('Plotting Graphs')
 plot_graph(test_loss, test_acc, fig_size=(15,10))
