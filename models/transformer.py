@@ -1,3 +1,7 @@
+import torch 
+import torch.nn as nn 
+import torch.nn.functional as F
+
 class Ultimus(nn.Module):
     def __init__(self, in_features, out_features):
         super(Ultimus, self).__init__()
@@ -19,9 +23,9 @@ class Ultimus(nn.Module):
         
         return self.fc_out(Z) # 8 --> 48
 
-class Network(nn.Module):
+class Basic_Transformer(nn.Module):
     def __init__(self):
-        super(Network, self).__init__()
+        super(Basic_Transformer, self).__init__()
         self.conv1 = nn.Sequential(
                          nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1, bias=False), 
                          nn.BatchNorm2d(16), 
