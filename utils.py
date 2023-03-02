@@ -81,7 +81,7 @@ class AlbumentationDataset(Dataset):
 
 def get_mean_and_std(dataset_class, no_channels, train=True):
     try:
-        data = dataset_class('./data', download=True, train=train).data
+        data = dataset_class('./data', download=False, train=train).data
         mean = np.mean(data, axis=(0, 1, 2), dtype=np.float64)/255.
         std = np.std(data, axis=(0, 1, 2), dtype=np.float64)/255.
         return tuple(mean), tuple(std)
