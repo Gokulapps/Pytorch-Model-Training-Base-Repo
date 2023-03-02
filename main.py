@@ -35,7 +35,6 @@ parser.add_argument('dataset', default='CIFAR10', type=str, help='Provide Pytorc
 parser.add_argument('epochs', default=20, type=int, help='Number of Epochs')
 parser.add_argument('batch_size', default=64, type=int, help='Batch Size')
 parser.add_argument('lr', default=0.001, type=float, help='Learning Rate')
-# parser.add_argument('max_lr', default=0.017, type=float, help='Maximum Learning Rate for OneCyclePolicy')
 parser.add_argument('--augmentation', action='store_true', help='whether to Perform Augmentation or not')
 parser.add_argument('--resume', '-r', action='store_true', help='Resume from checkpoint')
 args = parser.parse_args()
@@ -111,10 +110,14 @@ train_dataset = torchvisionDataset(root='./data', train=True, download=True, tra
 test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=transforms[0], alb_aug=None)
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
+print('Finding Maximum Learning Rate for the Model')
+print(f'Iteration 1 with Values between 0.0001 and 4')
 optimizer_exp1 = optim.SGD(model_exp1.parameters(), lr=0.0001, momentum=0.9)
 max_lr = find_optimal_lr(model_exp1, device, train_loader, optimizer_exp1, nn.CrossEntropyLoss(), end_lr=4)
+print(f'Iteration 2 with Values between {max_lr/10} and {max_lr*10}')
 optimizer_exp2 = optim.SGD(model_exp2.parameters(), lr=max_lr/10, momentum=0.9)
 final_max_lr = find_optimal_lr(model_exp2, device, train_loader, optimizer_exp2, nn.CrossEntropyLoss(), end_lr=max_lr*10)
+print(f'Maximum Learning Rate Found after 2 Iteration is {final_max_lr}')
 
 def train(model, device, train_loader, optimizer, l1_reg, scheduler):
     try:
