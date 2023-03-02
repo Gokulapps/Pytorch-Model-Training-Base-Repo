@@ -22,6 +22,7 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from models.resnet import ResNet18 
 from models.custom_resnet import CustomResnet
+from models.transformer import Basic_Transformer
 from utils import *
 from torch.optim.lr_scheduler import OneCycleLR
 from torchvision import datasets, transforms
@@ -48,7 +49,8 @@ test_loss = []
 test_acc = []
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # model = ResNet18().to(device)
-model= CustomResnet().to(device)
+# model= CustomResnet().to(device)
+model = Basic_Transformer()
 model_exp1 = deepcopy(model)
 model_exp2 = deepcopy(model)
 if device == 'cuda':
