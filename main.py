@@ -37,6 +37,7 @@ parser.add_argument('batch_size', default=64, type=int, help='Batch Size')
 parser.add_argument('lr', default=0.001, type=float, help='Learning Rate')
 parser.add_argument('--augmentation', action='store_true', help='whether to Perform Augmentation or not')
 parser.add_argument('--resume', '-r', action='store_true', help='Resume from checkpoint')
+parser.add_argument('--Adam', action='store_true', help='Flag to use Adam Optimizer instead of SGD') 
 args = parser.parse_args()
 Epochs = args.epochs
 dataset_class = getattr(torchvision.datasets, args.dataset)
@@ -197,9 +198,15 @@ def fit_model(model, final_max_lr, device, trainloader, testloader, l1=False, l2
     try:
         global best_acc, Epochs, test_loss, test_acc
         if l2:
-            optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
+            if args.Adam:
+                optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
+            else:
+                optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-4)
         else:
-            optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
+            if args.Adam:
+                optimizer = optim.Adam(model.parameters(), lr=args.lr)
+            else:
+                optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
         steps_per_epoch = len(train_loader) 
         total_steps = steps_per_epoch * Epochs
         step_size_up = steps_per_epoch * 5
@@ -225,7 +232,7 @@ def fit_model(model, final_max_lr, device, trainloader, testloader, l1=False, l2
         print(e)
         print(f'Error in {fit_model.__name__} Block')
 
-fit_model(model, final_max_lr, device, train_loader, test_loader, False, False)
+fit_model(model, final_max_lr, device, train_loader, test_loader, False, True)
 print('Model Saved')
 print('Plotting Graphs')
 plot_graph(test_loss, test_acc, fig_size=(15,10))
