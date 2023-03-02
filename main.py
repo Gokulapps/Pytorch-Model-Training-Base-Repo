@@ -106,14 +106,15 @@ def define_transforms(aug=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 
 train_dataset_mean, train_dataset_std = get_mean_and_std(dataset_class, 3, train=True)
 test_dataset_mean, test_dataset_std = get_mean_and_std(dataset_class, 3, train=False)
 transforms = define_transforms(args.augmentation, train_dataset_mean, train_dataset_std)
-train_dataset = torchvisionDataset(root='./data', train=True, download=True, transform=transforms[0], alb_aug=transforms[1])
-test_dataset =  torchvisionDataset(root='./data', train=False, download=True, transform=transforms[0], alb_aug=None)
+train_dataset = torchvisionDataset(root='./data', train=True, download=False, transform=transforms[0], alb_aug=transforms[1])
+test_dataset =  torchvisionDataset(root='./data', train=False, download=False, transform=transforms[0], alb_aug=None)
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
 print('Finding Maximum Learning Rate for the Model')
 print(f'Iteration 1 with Values between 0.0001 and 4')
 optimizer_exp1 = optim.SGD(model_exp1.parameters(), lr=0.0001, momentum=0.9)
 max_lr = find_optimal_lr(model_exp1, device, train_loader, optimizer_exp1, nn.CrossEntropyLoss(), end_lr=4)
+print(f'Maximum Learning Rate Found at the end of Iteration 1 is {max_lr}')
 print(f'Iteration 2 with Values between {max_lr/10} and {max_lr*10}')
 optimizer_exp2 = optim.SGD(model_exp2.parameters(), lr=max_lr/10, momentum=0.9)
 final_max_lr = find_optimal_lr(model_exp2, device, train_loader, optimizer_exp2, nn.CrossEntropyLoss(), end_lr=max_lr*10)
@@ -215,7 +216,7 @@ def fit_model(model, final_max_lr, device, trainloader, testloader, l1=False, l2
             start_epoch = checkpoint['epoch']
         else:
             start_epoch = 1
-        print('Model Training...')
+        print('Training Logs...')
         for epoch in range(start_epoch, Epochs+1):
             print("EPOCH:", epoch)
             train(model, device, trainloader, optimizer, l1, scheduler)
