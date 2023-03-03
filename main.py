@@ -57,7 +57,7 @@ if device == 'cuda':
     print("=> Parallelizing Training across Multiple GPU's")
     model = torch.nn.DataParallel(model)
     model_exp1 = torch.nn.DataParallel(model_exp1)
-    model_exp2 = torch.nn.Dataparallel(model_exp2)
+    model_exp2 = torch.nn.DataParallel(model_exp2)
 
 class torchvisionDataset(dataset_class):
     def __init__(self, root='./data', train=True, download=True, transform=transforms.ToTensor(), alb_aug=None):
