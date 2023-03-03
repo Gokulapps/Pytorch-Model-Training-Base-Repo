@@ -114,14 +114,21 @@ test_dataset =  torchvisionDataset(root='./data', train=False, download=False, t
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
 print('Finding Maximum Learning Rate for the Model')
-print(f'Iteration 1 with Values between 0.0001 and 4')
-optimizer_exp1 = optim.SGD(model_exp1.parameters(), lr=0.0001, momentum=0.9)
-max_lr = find_optimal_lr(model_exp1, device, train_loader, optimizer_exp1, nn.CrossEntropyLoss(), end_lr=4)
-print(f'Maximum Learning Rate Found at the end of Iteration 1 is {max_lr}')
-print(f'Iteration 2 with Values between {max_lr/10} and {max_lr*10}')
-optimizer_exp2 = optim.SGD(model_exp2.parameters(), lr=max_lr/10, momentum=0.9)
-final_max_lr = find_optimal_lr(model_exp2, device, train_loader, optimizer_exp2, nn.CrossEntropyLoss(), end_lr=max_lr*10)
-print(f'Maximum Learning Rate Found after 2 Iteration is {final_max_lr}')
+if args.Adam:
+    print(f'Iteration 1 with Values between 0.0001 and 4')
+    optimizer_exp1 = optim.Adam(model_exp1.parameters(), lr=0.0001)
+    max_lr = find_optimal_lr(model_exp1, device, train_loader, optimizer_exp1, nn.CrossEntropyLoss(), end_lr=4)
+    print(f'Iteration 2 with Values between {max_lr/10} and {max_lr*10}')
+    optimizer_exp2 = optim.Adam(model_exp2.parameters(), lr=max_lr/10)
+    final_max_lr = find_optimal_lr(model_exp2, device, train_loader, optimizer_exp2, nn.CrossEntropyLoss(), end_lr=max_lr*10)
+else:
+    print(f'Iteration 1 with Values between 0.0001 and 4')
+    optimizer_exp1 = optim.SGD(model_exp1.parameters(), lr=0.0001, momentum=0.9)
+    max_lr = find_optimal_lr(model_exp1, device, train_loader, optimizer_exp1, nn.CrossEntropyLoss(), end_lr=4)
+    print(f'Iteration 2 with Values between {max_lr/10} and {max_lr*10}')
+    optimizer_exp2 = optim.SGD(model_exp2.parameters(), lr=max_lr/10, momentum=0.9)
+    final_max_lr = find_optimal_lr(model_exp2, device, train_loader, optimizer_exp2, nn.CrossEntropyLoss(), end_lr=max_lr*10)
+  
 
 def train(model, device, train_loader, optimizer, l1_reg, scheduler):
     try:
