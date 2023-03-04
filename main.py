@@ -156,7 +156,6 @@ def train(model, device, train_loader, optimizer, l1_reg, scheduler):
               for param in model.parameters():
                 l1 += param.abs().sum()
               loss += lambda_y * l1
-            train_loss.append(loss.item())
             loss.backward()
             optimizer.step() 
             scheduler.step()
@@ -165,7 +164,10 @@ def train(model, device, train_loader, optimizer, l1_reg, scheduler):
             processed += len(images)
             accuracy = 100*correct/processed
             pbar.set_description(desc= f'Loss={loss.item()} Batch_id={batch_idx} Accuracy={accuracy:0.2f}')
-            train_acc.append(accuracy)
+        loss = loss.item() / len(train_loader.dataset)
+        train_loss.append(loss)
+        accuracy = 100. * correct / len(train_loader.dataset)
+        train_acc.append(accuracy)
     except Exception as e:
         print(e)
         print(f'Error in {train.__name__} Block')
