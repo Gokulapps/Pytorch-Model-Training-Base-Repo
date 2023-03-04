@@ -79,9 +79,8 @@ class AlbumentationDataset(Dataset):
 #   except Exception as e:
 #     print(e)
 
-def get_mean_and_std(dataset_class, no_channels, train=True):
+def get_mean_and_std(data, no_channels):
     try:
-        data = dataset_class('./data', download=True, train=train).data
         mean = np.mean(data, axis=(0, 1, 2), dtype=np.float64)/255.
         std = np.std(data, axis=(0, 1, 2), dtype=np.float64)/255.
         return tuple(mean), tuple(std)
