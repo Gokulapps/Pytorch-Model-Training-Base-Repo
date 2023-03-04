@@ -106,11 +106,18 @@ def define_transforms(aug=True, dataset_mean=(0.5, 0.5, 0.5), dataset_std=(0.5, 
         print(e)
         print(f'Error in {define_transforms.__name__} Block')
 
-train_dataset_mean, train_dataset_std = get_mean_and_std(dataset_class, 3, train=True)
-test_dataset_mean, test_dataset_std = get_mean_and_std(dataset_class, 3, train=False)
-transforms = define_transforms(args.augmentation, train_dataset_mean, train_dataset_std)
-train_dataset = torchvisionDataset(root='./data', train=True, download=False, transform=transforms[0], alb_aug=transforms[1])
-test_dataset =  torchvisionDataset(root='./data', train=False, download=False, transform=transforms[0], alb_aug=None)
+# Calculating Mean and Standard Deviation for Train and Test Dataset
+data_train = dataset_class('./data', download=True, train=True).data
+data_test = dataset_class('./data', download=True, train=False).data
+train_dataset_mean, train_dataset_std = get_mean_and_std(data_train, 3)
+test_dataset_mean, test_dataset_std = get_mean_and_std(data_test, 3)
+# Defining Transforms for Train and Test Dataset
+train_transforms = define_transforms(args.augmentation, train_dataset_mean, train_dataset_std)
+test_transforms = define_transforms(False, test_dataset_mean, test_dataset_std)
+# Creating Train and Test Dataset
+train_dataset = torchvisionDataset(root='./data', train=True, download=False, transform=train_transforms[0], alb_aug=train_transforms[1])
+test_dataset =  torchvisionDataset(root='./data', train=False, download=False, transform=test_transforms[0], alb_aug=test_transforms[1])
+# Loading the Train and Test Dataset into Batches 
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory = True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory = True)
 print('Finding Maximum Learning Rate for the Model')
