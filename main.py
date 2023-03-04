@@ -156,7 +156,7 @@ def train(model, device, train_loader, optimizer, l1_reg, scheduler):
               for param in model.parameters():
                 l1 += param.abs().sum()
               loss += lambda_y * l1
-            train_loss.append(loss)
+            train_loss.append(loss.item())
             loss.backward()
             optimizer.step() 
             scheduler.step()
