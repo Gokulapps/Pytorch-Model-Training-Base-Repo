@@ -170,7 +170,7 @@ def misclassified_images(model, device, testloader, limit=10):
 def plot_graph(train_loss, train_acc, test_loss, test_acc, fig_size=(15,10)):
     try:
         fig, axs = plt.subplots(2, 2, figsize=fig_size)
-        axs[0][0].plot(train_loss, color='yellow')
+        axs[0][0].plot(train_loss, color='black')
         axs[0][0].set_title("Train Loss")
         axs[0][0].set_xlabel('Number of Epoch')
         axs[0][0].set_ylabel('Loss')
@@ -178,7 +178,7 @@ def plot_graph(train_loss, train_acc, test_loss, test_acc, fig_size=(15,10)):
         axs[0][1].set_title("Validation Loss")
         axs[0][1].set_xlabel('Number of Epoch')
         axs[0][1].set_ylabel('Loss')
-        axs[1][0].plot(train_acc, color='yellow')
+        axs[1][0].plot(train_acc, color='black')
         axs[1][0].set_title("Train Accuracy")
         axs[1][0].set_xlabel('Number of Epoch')
         axs[1][0].set_ylabel('Accuracy(%)')
