@@ -17,8 +17,8 @@ class Ultimus(nn.Module):
         Q = self.fc_Q(tensor).unsqueeze(2) # 48 --> 8*1
         K = self.fc_K(tensor).unsqueeze(2) # 48 --> 8*1
         V = self.fc_V(tensor).unsqueeze(2) # 48 --> 8*1
-        AM = self.softmax(torch.matmul(torch.transpose(Q, dim0=1, dim1=2), K)/(Q.shape[1]**0.5)) # (1*8) * (8*1) --> 1*1
-        Z = torch.matmul(V, AM) # (8*1) * (1*1) --> 8*1 
+        AM = self.softmax(torch.matmul(K, torch.transpose(Q, dim0=1, dim1=2))/(Q.shape[1]**0.5)) # (8*1) * (1*8) --> 8*8
+        Z = torch.matmul(AM, V) # (8*8) * (8*1) --> 8*1 
         Z = Z.view(-1, 8) # 8*1 --> 8
         
         return self.fc_out(Z) # 8 --> 48
